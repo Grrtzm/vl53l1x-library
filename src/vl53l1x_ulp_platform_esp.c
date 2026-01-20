@@ -8,6 +8,18 @@
 #include "freertos/task.h"
 #include "driver/i2c_master.h"
 
+#include "vl53l1x_ulp_platform_esp.h"
+#include "esp_log.h"
+
+static const char *TAG = "vl53l1x_ulp_plat";
+static i2c_master_dev_handle_t s_dev = NULL;
+
+void vl53l1x_ulp_platform_bind(i2c_master_dev_handle_t dev)
+{
+    s_dev = dev;
+    ESP_LOGI(TAG, "bound i2c dev handle=%p", (void*)dev);
+}
+
 // Provided by vl53l1x_ulp_esp.c
 bool vl53l1x_ulp_esp_lookup(uint16_t dev_addr_8bit, i2c_master_dev_handle_t *out);
 
@@ -18,28 +30,26 @@ static inline uint8_t to_status(esp_err_t err)
 
 static uint8_t rd_n(uint16_t dev, uint16_t reg, uint8_t *buf, size_t len)
 {
-    i2c_master_dev_handle_t h;
-    if (!vl53l1x_ulp_esp_lookup(dev, &h)) return 255;
+    (void)dev;
+    if (s_dev == NULL) return 255;
 
     uint8_t regbuf[2] = { (uint8_t)(reg >> 8), (uint8_t)(reg & 0xFF) };
-    return to_status(i2c_master_transmit_receive(h, regbuf, sizeof(regbuf), buf, len, -1));
+    return to_status(i2c_master_transmit_receive(s_dev, regbuf, sizeof(regbuf), buf, len, -1));
 }
 
 static uint8_t wr_n(uint16_t dev, uint16_t reg, const uint8_t *buf, size_t len)
 {
-    i2c_master_dev_handle_t h;
-    if (!vl53l1x_ulp_esp_lookup(dev, &h)) return 255;
+    (void)dev;
+    if (s_dev == NULL) return 255;
 
-    // Small writes: pack into a single buffer to avoid extra overhead.
     if (len <= 16) {
         uint8_t tmp[2 + 16];
         tmp[0] = (uint8_t)(reg >> 8);
         tmp[1] = (uint8_t)(reg & 0xFF);
         memcpy(&tmp[2], buf, len);
-        return to_status(i2c_master_transmit(h, tmp, 2 + len, -1));
+        return to_status(i2c_master_transmit(s_dev, tmp, 2 + len, -1));
     }
 
-    // Larger writes: transmit register address + payload as multiple buffers.
     i2c_master_transmit_multi_buffer_info_t i2c_buffers[2];
     uint8_t regbuf[2] = { (uint8_t)(reg >> 8), (uint8_t)(reg & 0xFF) };
 
@@ -48,7 +58,7 @@ static uint8_t wr_n(uint16_t dev, uint16_t reg, const uint8_t *buf, size_t len)
     i2c_buffers[1].write_buffer = buf;
     i2c_buffers[1].buffer_size  = len;
 
-    return to_status(i2c_master_multi_buffer_transmit(h, i2c_buffers, 2, -1));
+    return to_status(i2c_master_multi_buffer_transmit(s_dev, i2c_buffers, 2, -1));
 }
 
 uint8_t VL53L1X_ULP_RdByte(uint16_t dev, uint16_t registerAddr, uint8_t *value)

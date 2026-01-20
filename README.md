@@ -1,36 +1,32 @@
-# VL53L1X ULP for ESP-IDF
-
-This is an ESP-IDF (v5.5+) port of ST's VL53L1X Ultra Low Power (ULP) API, packaged as an ESP-IDF component.
-
-
 # VL53L1X_Library (ESP-IDF)
 
-VL53L1X **Ultra Low Power (ULP)** driver as an ESP-IDF component, using the ESP-IDF v5.5+ **new I2C master driver** (`driver/i2c_master.h`).
+ESP-IDF component port of ST's **VL53L1X Ultra Low Power (ULP) API**.
 
-This repository ports ST's *VL53L1X ULP API* (from STSW-IMG032) to ESP-IDF by implementing the required platform functions (`VL53L1X_ULP_RdByte/...`, `VL53L1X_ULP_WaitMs`) on top of `i2c_master_transmit_receive()` and friends.
+- ESP-IDF **v5.5+**
+- Uses the **new I2C master driver** (`driver/i2c_master.h`)
+- Provides:
+  - ST ULP API (kept mostly as-is)
+  - A small **public wrapper API**: `include/vl53l1x.h`
+  - Standalone ESP-IDF **examples/**
+- Based on:
+  - *STMicroelectronics - VL53L1X - Ultra Lite Driver for Ultra Low Power*
+  - Version : 1.0.0.0, Date : 02/07/2021
 
-## Address convention (0x52 vs 0x29)
+## Install (ESP Component Registry)
 
-ST's ULP API uses the **8-bit** I2C address convention.
-- Default: **0x52** (write) / 0x53 (read)
+Once published, add:
 
-ESP-IDF expects a **7-bit** address. This component accepts ST's 8-bit address at the API boundary and shifts right internally.
-
-## Usage (minimal)
-
-```c
-#include "VL53L1X_ULP_api.h"
-#include "vl53l1x_ulp_esp.h"
-
-// after creating I2C bus handle:
-uint16_t dev = 0;
-ESP_ERROR_CHECK(vl53l1x_ulp_esp_add_device(bus, 0x52, &dev));
-
-uint16_t id = 0;
-VL53L1X_ULP_GetSensorId(dev, &id);
+```yaml
+dependencies:
+  grrtzm/vl53l1x_library: "^0.3.1"
 ```
 
-## License
+## Quick start (examples)
 
-- ST source files are dual-licensed (ST proprietary or BSD-3-Clause, as stated in file headers).
-- This component's ESP-IDF platform adaptation is intended to be BSD-3-Clause.
+See `examples/basic_ranging` and `examples/ultra_low_power`.
+
+## Notes
+
+- The ST ULP API uses an 8-bit I2C address (0x52). The wrapper uses the normal 7-bit address (0x29).
+- After reading a measurement, the interrupt must be cleared (handled by `vl53l1x_read()`).
+- You only need to connect the power supply (VIN), ground (GND), SDA and SCL pins of the module. Do not connect the other pins directly to GND or VIN.

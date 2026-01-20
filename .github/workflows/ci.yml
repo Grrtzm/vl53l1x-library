@@ -1,0 +1,28 @@
+name: Build (targets)
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [esp32, esp32s2, esp32s3, esp32c3, esp32c6]
+        example: [basic_ranging, ultra_low_power]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up ESP-IDF
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: v5.5.2
+
+      - name: Build example
+        working-directory: examples/${{ matrix.example }}
+        run: |
+          idf.py set-target ${{ matrix.target }}
+          idf.py build

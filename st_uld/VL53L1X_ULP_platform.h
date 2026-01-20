@@ -64,7 +64,6 @@
 #include <stdint.h>
 #include <string.h>
 
-
 /**
  * @brief Read 32 bits through I2C.
  */

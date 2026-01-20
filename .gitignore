@@ -1,0 +1,10 @@
+﻿# Build / release artifacts
+dist/
+
+# ESP-IDF build output (optioneel, maar veilig)
+build/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/

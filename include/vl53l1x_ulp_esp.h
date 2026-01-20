@@ -18,9 +18,10 @@ extern "C" {
  * @param dev_addr_8bit 8-bit I2C address (e.g. 0x52). The 7-bit address is (addr >> 1).
  * @param out_dev_addr  If non-NULL, returns the same 8-bit address (for convenience).
  */
+
 esp_err_t vl53l1x_ulp_esp_add_device(i2c_master_bus_handle_t bus,
-                                    uint8_t dev_addr_8bit,
-                                    uint16_t *out_dev_addr);
+                                    uint8_t addr7,
+                                    i2c_master_dev_handle_t *out_dev);
 
 /**
  * @brief Unregister a device previously added with vl53l1x_ulp_esp_add_device().

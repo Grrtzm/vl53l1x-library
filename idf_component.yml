@@ -1,21 +1,27 @@
-namespace: "grrtzm"
-name: "vl53l1x-library"
-version: "0.1.0"
-description: "VL53L1X Ultra Low Power (ULP) API port for ESP-IDF v5.5+, using the new I2C master driver."
-license: "BSD-3-Clause"
-repository: "https://github.com/Grrtzm/VL53L1X_Library"
-url: "https://github.com/Grrtzm/VL53L1X_Library"
+namespace: grrtzm
+name: vl53l1x_library
+version: 0.3.1
+description: VL53L1X Ultra Low Power (ULP) API port for ESP-IDF v5.5+, using the
+  new I2C master driver.
+license: BSD-3-Clause
+repository: https://github.com/grrtzm/vl53l1x_library
+url: https://github.com/grrtzm/vl53l1x_library
 
 tags:
-  - tof-sensor
-  - distance-sensor
-  - i2c
-  - vl53l1x
-  - esp-idf
+- tof-sensor
+- distance-sensor
+- i2c
+- vl53l1x
+- esp-idf
 
 targets:
-  - esp32
+- esp32
+- esp32s2
+- esp32s3
+- esp32c3
+- esp32c6
 
 dependencies:
   idf:
-    version: ">=5.5.0"
+    version: '>=5.5.2'
+
