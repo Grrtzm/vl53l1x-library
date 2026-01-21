@@ -23,40 +23,34 @@ jobs:
             set -e
             export IDF_TARGET=${{ matrix.target }}
 
-            # Find repo root inside the container (checkout ends up under /app/<owner>/<repo>)
+            # Find repo root inside the container
             REPO_ROOT="$(find /app -maxdepth 3 -type f -name idf_component.yml -print -quit | xargs -r dirname)"
             if [ -z "$REPO_ROOT" ]; then
               echo "ERROR: Could not locate repo root (idf_component.yml not found under /app)"
-              find /app -maxdepth 3 -type f -name idf_component.yml -print || true
               exit 1
             fi
             echo "REPO_ROOT=$REPO_ROOT"
             cd "$REPO_ROOT"
 
-            # Create a real directory with the canonical component name
+            # Prepare canonical component dir
             mkdir -p /tmp/components/vl53l1x_library
-
-            # Copy repo contents (excluding build artifacts / git metadata)
-            # Copy repo contents without rsync
             rm -rf /tmp/components/vl53l1x_library/*
             cp -a "$REPO_ROOT"/. /tmp/components/vl53l1x_library/
-
-            # Optional: remove build artifacts if present
-            find /tmp/components/vl53l1x_library -type d -name build -prune -exec rm -rf {} +
-            rm -rf /tmp/components/vl53l1x_library/dist || true
-            rm -rf /tmp/components/vl53l1x_library/.git || true
-
-            export EXTRA_COMPONENT_DIRS="/tmp/components/vl53l1x_library"
-            echo "EXTRA_COMPONENT_DIRS=$EXTRA_COMPONENT_DIRS"
-            ls -la /tmp/components/vl53l1x_library | head
+            find /tmp/components/vl53l1x_library -type d -name build -prune -exec rm -rf {} + || true
+            rm -rf /tmp/components/vl53l1x_library/dist /tmp/components/vl53l1x_library/.git || true
 
             for ex in "$REPO_ROOT"/examples/*; do
               if [ -d "$ex" ] && [ -f "$ex/CMakeLists.txt" ]; then
                 echo "=== Building $ex for target $IDF_TARGET ==="
                 cd "$ex"
+
+                # Inject component into the example project
+                rm -rf components/vl53l1x_library || true
+                mkdir -p components
+                cp -a /tmp/components/vl53l1x_library components/vl53l1x_library
+
                 idf.py set-target "$IDF_TARGET"
                 idf.py build
                 cd "$REPO_ROOT"
               fi
             done
-
