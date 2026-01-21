@@ -23,6 +23,7 @@ jobs:
           command: |
             export IDF_TARGET=${{ matrix.target }}
             cd examples/${{ matrix.example }}
+            export EXTRA_COMPONENT_DIRS="$GITHUB_WORKSPACE"
             idf.py set-target ${{ matrix.target }}
             idf.py build
 
