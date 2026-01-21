@@ -23,8 +23,7 @@ jobs:
           command: |
             export IDF_TARGET=${{ matrix.target }}
             cd examples/${{ matrix.example }}
-            export EXTRA_COMPONENT_DIRS="/app/Grrtzm/vl53l1x_library"
             idf.py set-target ${{ matrix.target }}
+            idf.py add-dependency "grrtzm/vl53l1x_library^0.3.1"
             idf.py build
-
 
