@@ -20,6 +20,7 @@ jobs:
         uses: espressif/esp-idf-ci-action@v1
         with:
           esp_idf_version: v5.5.2
+          command: true
 
       - name: Build example
         working-directory: examples/${{ matrix.example }}
