@@ -23,12 +23,20 @@ jobs:
             set -e
             export IDF_TARGET=${{ matrix.target }}
 
-            # repo root = directory where checkout placed the repo
+            cd "${{ github.workspace }}"
             REPO_ROOT="$(pwd)"
             echo "REPO_ROOT=$REPO_ROOT"
 
-            mkdir -p /tmp/components
-            ln -s "$REPO_ROOT" /tmp/components/vl53l1x_library
+            # Create a real directory with the canonical component name
+            mkdir -p /tmp/components/vl53l1x_library
+
+            # Copy repo contents (excluding build artifacts / git metadata)
+            rsync -a --delete \
+              --exclude ".git" \
+              --exclude "dist" \
+              --exclude "**/build" \
+              "$REPO_ROOT"/ /tmp/components/vl53l1x_library/
+
             export EXTRA_COMPONENT_DIRS="/tmp/components"
 
             for ex in "$REPO_ROOT"/examples/*; do
@@ -37,5 +45,7 @@ jobs:
                 cd "$ex"
                 idf.py set-target "$IDF_TARGET"
                 idf.py build
+                cd "$REPO_ROOT"
               fi
             done
+
